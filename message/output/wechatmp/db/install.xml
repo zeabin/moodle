@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="message/output/wechatmp/db" VERSION="20200403" COMMENT="XMLDB file for Moodle message/output/wechatmp"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="message_wechatmp_user" COMMENT="Stores the openid, remaining number of push notifications of Moodle users">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="openid" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="id of a wechat account"/>
+        <FIELD NAME="remainingnumber" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="the remaining number of push notifications can be used"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="foreign" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" COMMENT="user id references id in the user table"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
