@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $tasks = [
     [
-        'classname' => 'local_reminders\\task\\send_reminders',
+        'classname' => 'local_assign_reminders\\task\\send_reminders',
         'blocking' => 0,
         'minute' => '0',
         'hour' => '*',

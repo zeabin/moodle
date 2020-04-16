@@ -23,4 +23,4 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->version    = 2020041522;           // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires   = 2019111200;             // Requires this Moodle version.
-$plugin->component  = 'local_assign_reminder';  // Full name of the plugin (used for diagnostics).
+$plugin->component  = 'local_assign_reminders';  // Full name of the plugin (used for diagnostics).
