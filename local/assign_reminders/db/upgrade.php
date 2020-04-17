@@ -51,7 +51,7 @@ function xmldb_local_assign_reminders_upgrade($oldversion) {
 
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
-    if ($oldversion < 2020041616) {
+    if ($oldversion < 2020041615) {
 
         // Define table local_assign_reminders to be created.
         $table = new xmldb_table('local_assign_reminders');
@@ -70,6 +70,8 @@ function xmldb_local_assign_reminders_upgrade($oldversion) {
         }
 
         // Assign_reminders savepoint reached.
-        upgrade_plugin_savepoint(true, 2020041616, 'local', 'assign_reminders');
+        upgrade_plugin_savepoint(true, 2020041615, 'local', 'assign_reminders');
     }
+
+    return true;
 }

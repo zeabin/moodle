@@ -22,4 +22,14 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['admintreelabel'] = 'Assignment Reminders';
+$string['days7'] = '7 Days';
+$string['days3'] = '3 Days';
+$string['days1'] = '1 Day';
+$string['explaindueheading'] = 'Reminder settings for assignments.';
+$string['filterevents'] = 'Filter calendar events:';
+$string['filtereventsdescription'] = 'Which calendar events should be filtered and send reminders for them.';
+$string['filtereventsonlyvisible'] = 'Only visible events in calendar';
+$string['filtereventssendall'] = 'All events';
 $string['pluginname'] = 'Assignment Reminders';
+$string['reminderdaysahead'] = 'Send before:';
