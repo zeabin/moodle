@@ -30,7 +30,7 @@ $tasks = [
     [
         'classname' => 'local_assign_reminders\\task\\send_reminders',
         'blocking' => 0,
-        'minute' => '0',
+        'minute' => '*/30',
         'hour' => '*',
         'day' => '*',
         'dayofweek' => '*',

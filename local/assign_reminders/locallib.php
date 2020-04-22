@@ -24,6 +24,9 @@
  */
 defined('MOODLE_INTERNAL') || die;
 
+require_once($CFG->dirroot . '/course/lib.php');
+
+require_once($CFG->dirroot . '/local/assign_reminders/reminder.class.php');
 
 /**
  * Process activity event and creates a reminder instance wrapping it.
@@ -32,13 +35,12 @@ defined('MOODLE_INTERNAL') || die;
  * @param int $aheadday number of days ahead.
  * @param array $activityroleids role ids for activities.
  * @param boolean $showtrace whether to print logs or not.
- * @param string $calltype calling type PRE|OVERDUE.
  * @return reminder_ref reminder reference instance.
  */
-function process_event($event, $aheadday, $activityroleids=null, $showtrace=true, $calltype=REMINDERS_CALL_TYPE_PRE) {
+function process_event($event, $aheadday, $activityroleids=null, $showtrace=true) {
     global $DB, $PAGE;
-
-    if (isemptystring($event->modulename)) {
+    
+    if (!isset($event->modulename) || empty($event->modulename) || trim($event->modulename) === '') {
         return null;
     }
 
@@ -51,11 +53,10 @@ function process_event($event, $aheadday, $activityroleids=null, $showtrace=true
     $cm = $courseandcm[1];
 
     if (!empty($course) && !empty($cm)) {
-        $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid, $showtrace);
         $context = context_module::instance($cm->id);
         $PAGE->set_context($context);
         $sendusers = array();
-        $reminder = new due_reminder($event, $course, $context, $cm, $aheadday);
+        $reminder = new assign_reminder($event, $course, $context, $cm, $aheadday);
 
         if ($event->courseid <= 0 && $event->userid > 0) {
             // A user overridden activity.
@@ -70,17 +71,20 @@ function process_event($event, $aheadday, $activityroleids=null, $showtrace=true
         } else {
             // Here 'ra.id field added to avoid printing debug message,
             // from get_role_users (has odd behaivior when called with an array for $roleid param'.
-            $sendusers = get_active_role_users($activityroleids, $context);
+            $sendusers = assign_get_active_role_users($activityroleids, $context);
 
+            foreach ($activityroleids as $key=>$value) {
+                mtrace($key. ' '. $value);
+            }
             // Filter user list,
             // see: https://docs.moodle.org/dev/Availability_API.
             $info = new \core_availability\info_module($cm);
             $sendusers = $info->filter_user_list($sendusers);
         }
 
-        $reminder->set_activity($event->mudulename, $activityobj);
-        $filteredusers = $reminder->filter_authorized_users($sendusers, $calltype);
-        return new reminder_ref($reminder, $filteredusers);
+        $filteredusers = $reminder->filter_authorized_users($sendusers);
+        // $filteredusers = $sendusers;
+        return new assign_reminder_ref($reminder, $filteredusers);
     }
     return null;
 }
@@ -103,7 +107,7 @@ function process_event($event, $aheadday, $activityroleids=null, $showtrace=true
  * @return individual module instance (a quiz, a assignment, etc).
  *          If fails returns null
  */
-function fetch_module_instance($modulename, $instance, $courseid=0, $showtrace=true) {
+function assign_fetch_module_instance($modulename, $instance, $courseid=0, $showtrace=true) {
     global $DB;
 
     $params = array('instance' => $instance, 'modulename' => $modulename);
@@ -130,6 +134,21 @@ function fetch_module_instance($modulename, $instance, $courseid=0, $showtrace=t
     }
 }
 
+/**
+ * Returns array of users active (not suspended) in the provided contexts and
+ * at the same time belongs to the given roles.
+ *
+ * @param array $activityroleids role ids
+ * @param object $context context to search for users
+ * @return array of user records
+ */
+function assign_get_active_role_users($activityroleids, $context) {
+    return get_role_users($activityroleids, $context, true, 'ra.id, u.*',
+                    null, false, '', '', '',
+                    'ue.status = :userenrolstatus',
+                    array('userenrolstatus' => ENROL_USER_ACTIVE));
+}
+
 
 /**
  * Reminder reference class.
@@ -138,11 +157,11 @@ function fetch_module_instance($modulename, $instance, $courseid=0, $showtrace=t
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class reminder_ref {
+class assign_reminder_ref {
     /**
      * created reminder reference.
      *
-     * @var local_reminder
+     * @var local_assign_reminder
      */
     protected $reminder;
     /**
@@ -155,7 +174,7 @@ class reminder_ref {
     /**
      * Creates new reminder reference.
      *
-     * @param local_reminder $reminder created reminder.
+     * @param local_assign_reminder $reminder created reminder.
      * @param array $sendusers array of users.
      */
     public function __construct($reminder, $sendusers) {

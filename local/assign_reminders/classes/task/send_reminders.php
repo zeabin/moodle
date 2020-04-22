@@ -54,7 +54,7 @@ class send_reminders extends \core\task\scheduled_task {
      * @return string task name.
      */
     public function get_name() {
-        return get_string('reminderstask', 'local_reminders');
+        return get_string('reminderstask', 'local_assign_reminders');
     }
 
 }

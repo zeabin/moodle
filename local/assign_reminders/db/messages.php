@@ -26,5 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $messageproviders = array (
     // Reminders for assignments.
-    'assignment reminders' => array()
+    'assignment_reminders' => array(
+    )
 );

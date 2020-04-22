@@ -27,24 +27,30 @@ defined('MOODLE_INTERNAL') || die;
 
 if ($hassiteconfig) {
 
-    require_once($CFG->dirroot.'/local/reminders/lib.php');
+    require_once($CFG->dirroot.'/local/assign_reminders/lib.php');
 
-    $settings = new admin_settingpage('local_reminders', get_string('admintreelabel', 'local_assign_reminders'));
+    $settings = new admin_settingpage('local_assign_reminders', get_string('admintreelabel', 'local_assign_reminders'));
     $ADMIN->add('localplugins', $settings);
 
-    $choices = array(REMINDERS_SEND_ALL_EVENTS => get_string('filtereventssendall', 'local_assign_reminders'),
-                     REMINDERS_SEND_ONLY_VISIBLE => get_string('filtereventsonlyvisible', 'local_assign_reminders'));
+    // Adds a checkbox to enable/disable sending reminders.
+    $settings->add(new admin_setting_configcheckbox('local_assign_reminders_enable',
+            get_string('enabled', 'local_assign_reminders'),
+            get_string('enableddescription', 'local_assign_reminders'), 1));
+
+    $choices = array(ASSIGN_REMINDERS_SEND_ALL_EVENTS => get_string('filtereventssendall', 'local_assign_reminders'),
+                     ASSIGN_REMINDERS_SEND_ONLY_VISIBLE => get_string('filtereventsonlyvisible', 'local_assign_reminders'));
 
     $settings->add(new admin_setting_configselect('local_assign_reminders_filterevents',
             get_string('filterevents', 'local_assign_reminders'),
             get_string('filtereventsdescription', 'local_assign_reminders'),
-            REMINDERS_SEND_ONLY_VISIBLE, $choices));
+            ASSIGN_REMINDERS_SEND_ONLY_VISIBLE, $choices));
 
     $daysarray = array('days7' => ' '.get_string('days7', 'local_assign_reminders'),
-    'days3' => ' '.get_string('days3', 'local_assign_reminders'),
-    'days1' => ' '.get_string('days1', 'local_assign_reminders'));
+            'days3' => ' '.get_string('days3', 'local_assign_reminders'),
+            'days1' => ' '.get_string('days1', 'local_assign_reminders'));
+    $defaultdue = array('days7' => 0, 'days3' => 1, 'days1' => 0);
 
-    $settings->add(new admin_setting_configmulticheckbox2('local_assign_reminders_duerdays',
+    $settings->add(new admin_setting_configmulticheckbox2('local_assign_reminders_rdays',
             get_string('reminderdaysahead', 'local_assign_reminders'),
             get_string('explaindueheading', 'local_assign_reminders'),
             $defaultdue, $daysarray));

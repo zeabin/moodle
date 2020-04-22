@@ -43,13 +43,35 @@ class assign_reminder {
     public $eventobject;
 
     /**
+     * Course reference.
+     *
+     * @var object
+     */
+    protected $course;
+
+    /**
+     * @var object
+     */
+    private $coursemodule;
+    /**
+     * @var object
+     */
+    private $cm;
+
+    /**
      * Creates a new reminder instance with event and no of days ahead value.
      *
      * @param object $event calendar event.
+     * @param object $course course instance.
+     * @param object $cm coursemodulecontext instance.
+     * @param object $coursemodule course module.
      * @param integer $aheaddays number of days ahead.
      */
-    public function __construct($event, $aheaddays = 1) {
+    public function __construct($event, $course, $cm, $coursemodule, $aheaddays = 1) {
         $this->event = $event;
+        $this->course = $course;
+        $this->cm = $cm;
+        $this->coursemodule = $coursemodule;
         $this->aheaddays = $aheaddays;
     }
 
@@ -66,20 +88,19 @@ class assign_reminder {
      * Filter out users who still does not have completed this activity.
      *
      * @param array $users user array to check.
-     * @param string $type type of request. Pre|Post for now.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type=null) {
+    public function filter_authorized_users($users) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/assign/lib.php');
 
         $filteredusers = array();
         foreach ($users as $auser) {
-            $cansubmit = has_capability('mod/assign:submit', $coursemodulecontext, $auser);
+            $cansubmit = has_capability('mod/assign:submit', $this->cm, $auser);
             if (!$cansubmit) {
                 continue;
             }
-            $status = assign_get_completion_state($course, $coursemodule, $auser->id, false);
+            $status = assign_get_completion_state($this->course, $this->coursemodule, $auser->id, false);
             if (!$status) {
                 $filteredusers[] = $auser;
             }
@@ -94,7 +115,7 @@ class assign_reminder {
      * @return string Message provider name
      */
     protected function get_message_provider() {
-        return 'assignment reminders';
+        return 'assignment_reminders';
     }
 
     /**
@@ -106,22 +127,31 @@ class assign_reminder {
      * @return object a message object which will be sent to the messaging API
      */
     public function create_reminder_message_object($admin=null) {
-        global $CFG;
+        global $CFG, $DB;
 
         if ($admin == null) {
             $admin = get_admin();
         }
-
+        $coursename = $DB->get_field('course', 'fullname', array('id' => $this->event->courseid));
+        $customdata = array(
+            'coursename' => $coursename,
+            'assignname' => $this->event->name,
+            'eventtype'  => 'due'
+        );
         $eventdata = new \core\message\message();
 
         $eventdata->component           = 'local_assign_reminders';
         $eventdata->name                = $this->get_message_provider();
         $eventdata->userfrom            = $admin;
         $eventdata->subject             = '';
+        $eventdata->fullmessage         = '作业提交提醒';
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
-        $eventdata->fullmessagehtml     = '';
-        $eventdata->smallmessage        = '';
+        $eventdata->fullmessagehtml     = $this->event->name;
+        $eventdata->smallmessage        = 'assign_due';
         $eventdata->notification        = $this->notification;
+
+        $eventdata->modulename          = 'assign';
+        $eventdata->customdata          = $customdata;
 
         // Save created object with reminder object.
         $this->eventobject = $eventdata;
@@ -171,12 +201,18 @@ class assign_reminder {
      * @return object notification instance.
      */
     public function get_updating_event_message($changetype, $admin=null, $touser=null) {
-        global $CFG;
+        global $DB;
 
         $fromuser = $admin;
         if ($fromuser == null) {
             $fromuser = get_admin();
         }
+        $coursename = $DB->get_field('course', 'fullname', array('id' => $this->event->courseid));
+        $customdata = array(
+            'coursename' => $coursename,
+            'assignname' => $this->event->name,
+            'eventtype'  => 'due'
+        );
 
         $eventdata = new \core\message\message();
 
@@ -185,11 +221,14 @@ class assign_reminder {
         $eventdata->userfrom            = $fromuser;
         $eventdata->userto              = $touser;
         $eventdata->subject             = '';
-        $eventdata->fullmessage         = '';
+        $eventdata->fullmessage         = '作业提交提醒';
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
-        $eventdata->fullmessagehtml     = '';
-        $eventdata->smallmessage        = '';
+        $eventdata->fullmessagehtml     = $this->event->name;
+        $eventdata->smallmessage        = 'assign_due';
         $eventdata->notification        = $this->notification;
+
+        $eventdata->modulename          = 'assign';
+        $eventdata->customdata          = $customdata;
 
         return $eventdata;
     }
