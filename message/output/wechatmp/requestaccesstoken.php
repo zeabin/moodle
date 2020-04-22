@@ -31,41 +31,6 @@ require_login();
 require_sesskey();
 require_capability('moodle/site:config', context_system::instance());
 
-// function send_due_assignment_message($coursename, $assignname, $useropenid, $token) {
-//     global $CFG;
-
-//     require_once($CFG->libdir . '/filelib.php');
-
-//     $serverurl = 'https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=' . $token;
-//     $curl = new curl();
-//     $params = array(
-//         'touser' => $useropenid,
-//         'template_id' => $CFG->dueassigntemplateid,
-//         'data' => array(
-//             'thing7' => array(
-//                 'value' => "$coursename"
-//             ),
-//             'thing9' => array(
-//                 'value' => "$assignname"
-//             )
-//         )
-//     );
-//     // JSON POST raw body request.
-//     $resp = $curl->post($serverurl, json_encode($params));
-
-//     return json_decode($resp, true);
-//     // if ($key = json_decode($resp, true)) {
-//     //     if (!empty($key['errCode'])) {
-//     //         if (!$key['errCode']) { // errCode = 0, success
-//     //             return true;
-//     //         }
-//     //     }
-//     // }
-
-//     // return false; // fail
-// }
-
-// $strheading = get_string('requestaccesskey', 'message_airnotifier');
 $strheading = get_string('requestaccesstoken', 'message_wechatmp');
 $PAGE->navbar->add(get_string('administrationsite'));
 $PAGE->navbar->add(get_string('plugins', 'admin'));
@@ -81,22 +46,9 @@ $msg = "";
 
 $cache = cache::make('message_wechatmp', 'access_token');
 if ($token = $cache->get('access_token')) {
-
-// $manager = new message_wechatmp_manager();
-
-// // if ($token = $manager->request_openid('061FmHn02hIbXV04kwk02mk7o02FmHns')) {
-// if ($token = $manager->request_accesstoken()) {
     $msg = get_string('accesstokenretrievedsuccessfully', 'message_wechatmp');
     $msg .= ': |';
     $msg .= $token;
-
-    // if ($ret = send_due_assignment_message('Moodle小程序', '作业1', 'oCk4g5ZtNMrhTcx3_vrkKNxK-pFU', $token)) {
-    //     $msg .= '|         ';
-    //     $msg .= $ret['errmsg'];
-    // } else {
-    //     $msg .= '\n 发送失败';
-    // }
-
 } else {
     $msg = get_string('errorretrievingkey', 'message_airnotifier');
 }
