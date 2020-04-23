@@ -25,6 +25,8 @@
 $string['accesstokenretrievedsuccessfully'] = '微信access token获取成功';
 $string['configappid'] = '微信小程序的appid';
 $string['configappsecret'] = 'appid对应的appsecert';
+$string['configdueassigntemplateid'] = '作业到期通知的模板id';
+$string['dueassigntemplateid'] = '模板id';
 $string['myfield'] = 'This is my custom field';
 $string['pluginname'] = '微信小程序通知';
 $string['requestaccesstoken'] = '请求微信access token';

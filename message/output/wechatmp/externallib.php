@@ -178,4 +178,25 @@ class message_wechatmp_external extends external_api {
     public static function subscribe_returns() {
         return new external_value(PARAM_INT, '1 if success, 0 otherwise');
     }
+
+    public static function remaining_number_parameters() {
+        return new external_function_parameters(
+            array()
+        );
+    }
+
+    public static function remaining_number() {
+        global $DB, $USER;
+
+        $userid = $USER->id;
+        if ($DB->count_records(WECHAT_USER_TABLE, array('userid' => $userid)) == 1) {
+            return $DB->get_field(WECHAT_USER_TABLE, 'remainingnumber', array('userid' => $userid));
+        }
+
+        return -1;
+    }
+
+    public static function remaining_number_returns() {
+        return new external_value(PARAM_INT, 'Nonnegetive value of remaining number of notification can be set to wecchat, -1 if the user\'s wechat account not exist');
+    }
 }
