@@ -45,8 +45,27 @@ class message_wechatmp_manager {
             $userid = $USER->id;
         }
 
-        if ($openid = $DB->get_record('wechat_openid', array('userid' => $userid))) {
-            return $openid;
+        if ($user = $DB->get_record('message_wechatmp_user', array('userid' => $userid))) {
+            return $user->openid;
+        }
+        return false;
+    }
+
+    /**
+     * Return wechat user object.
+     * 
+     * @param int $userid if empty take the current user.
+     * @return mixed wechat user object or false if the user hasn't bind a wechat account.
+     */
+    public function get_wechat_user($userid = null) {
+        global $USER, $DB;
+
+        if (empty($userid)) {
+            $userid = $USER->id;
+        }
+
+        if ($user = $DB->get_record('message_wechatmp_user', array('userid' => $userid))) {
+            return $user;
         }
         return false;
     }

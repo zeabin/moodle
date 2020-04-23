@@ -19,16 +19,16 @@
  * Strings for component 'message_custom'
  *
  * @package   message_custom
- * @copyright 2020 Zheng Zhibin
+ * @copyright 2011 onwards Andrew Davis  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-$string['accesstokenretrievedsuccessfully'] = 'Fetch Wechat access token successfully';
-$string['configappid'] = 'Appid of wechat';
-$string['configappsecret'] = 'Appsecert to the appid';
-$string['configdueassigntemplateid'] = 'Template id for due assignment notification';
-$string['dueassigntemplateid'] = 'Template id';
+$string['accesstokenretrievedsuccessfully'] = 'Wechat access token retrieved successfully';
+$string['configappid'] = 'The appid of a wechat miniprogram';
+$string['configappsecret'] = 'The appsecert of the appid';
+$string['configdueassigntemplateid'] = 'Template id for wechat miniprogram notification of due assignments';
+$string['dueassigntemplateid'] = 'Assign template id';
 $string['myfield'] = 'This is my custom field';
-$string['pluginname'] = 'Wechat miniprogram notification';
+$string['pluginname'] = 'Wechat Miniprogram Notifier';
 $string['requestaccesstoken'] = 'Request access token';
-$string['wechatappid'] = 'Wchat Appid';
+$string['wechatappid'] = 'Wechat Appid';
 $string['wechatappsecret'] = 'Wechat Appseceret';

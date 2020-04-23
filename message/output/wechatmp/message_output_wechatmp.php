@@ -45,7 +45,7 @@ class message_output_wechatmp extends message_output {
      * @return true if ok, false if error
      */
     public function send_message($eventdata) {
-        global $CFG, $DB;
+        global $CFG;
         require_once($CFG->libdir . '/filelib.php');
 
         if (!empty($CFG->noemailever)) {
@@ -62,17 +62,18 @@ class message_output_wechatmp extends message_output {
         }
         
         
-        if (empty($eventdata->modulename) || empty($eventdata->eventtype) ||
-                $eventdata->modulename != 'assign' || $eventdata->eventtype != 'due') { // Only assignment notification can be sent.
+        if (empty($eventdata->modulename) || empty($eventdata->smallmessage) || empty($eventdata->customdata) ||
+                $eventdata->modulename != 'assign' || $eventdata->smallmessage != 'assign_due') { // Only assignment notification can be sent.
             return false;
         }
 
         $manager = new message_wechatmp_manager();
-        if ($openid = $manager->get_user_openid()) {
-            
-            $assignname = $eventdata->name;
-            $coursename = $DB->get_field('course', 'fullname', array('id' => $eventdata->courseid));
-            return self::send_due_assignment_message($coursename, $assignname, $openid);
+        if ($user = $manager->get_wechat_user($eventdata->userto->id)) {
+            $customdata = json_decode($eventdata->customdata, true);
+            $assignname = $customdata['assignname'];
+            $coursename = $customdata['coursename'];
+
+            return self::send_due_assignment_message($coursename, $assignname, $user);
         }
 
         // Cannot find the openid for the user.
@@ -109,16 +110,19 @@ class message_output_wechatmp extends message_output {
     }
 
     /**
-     * Tests whether the wechat miniprogram settings have been configured
-     * @return boolean true if wechat miniprogram is configured
+     * Send assignment submittion notification to wechat server.
+     * @param string $coursename course name
+     * @param string $assignname assignment name
+     * @param object wechat user object
+     * @return boolean true if success, false otherwise
      */
-    public function is_system_configured() {
-        $manager = new message_wechatmp_manager();
-        return $manager->is_system_configured();
-    }
+    private function send_due_assignment_message($coursename, $assignname, $user) {
+        global $CFG, $DB;
 
-    private function send_due_assignment_message($coursename, $assignname, $useropenid) {
-        global $CFG;
+        // 一次性订阅消息需要检查用户订阅次数是否大于0
+        if ($user->remainingnumber <= 0) {
+            return false;
+        }
 
         require_once($CFG->libdir . '/filelib.php');
 
@@ -127,7 +131,7 @@ class message_output_wechatmp extends message_output {
             $serverurl = 'https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=' . $token;
             $curl = new curl();
             $params = array(
-                'touser' => $useropenid,
+                'touser' => $user->openid,
                 'template_id' => $CFG->dueassigntemplateid,
                 'data' => array(
                     'thing7' => array(
@@ -142,10 +146,10 @@ class message_output_wechatmp extends message_output {
             $resp = $curl->post($serverurl, json_encode($params));
 
             if ($key = json_decode($resp, true)) {
-                if (!empty($key['errCode'])) {
-                    if (!$key['errCode']) { // errCode = 0, success
-                        return true;
-                    }
+                if (!$key['errcode']) { // errCode = 0, success
+                    // 发送消息后订阅次数减1
+                    $DB->set_field('message_wechatmp_user', 'remainingnumber', $user->remainingnumber - 1, array('userid' => $user->userid));
+                    return true;
                 }
             }
         }
