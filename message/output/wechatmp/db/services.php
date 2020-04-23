@@ -65,4 +65,12 @@ $functions = array(
         'type'        => 'write',
         'services'    => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
+    'message_wechatmp_remaining_number' => array(
+        'classname'   => 'message_wechatmp_external',
+        'methodname'  => 'remaining_number',
+        'classpath'   => 'message/output/wechatmp/externallib.php',
+        'description' => 'Get remaining number of wechat notification can be sent.',
+        'type'        => 'write',
+        'services'    => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+    )
 );

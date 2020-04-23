@@ -24,6 +24,8 @@
  * @since Moodle 2.7
  */
 
+use block_recentlyaccesseditems\external;
+
 defined('MOODLE_INTERNAL') || die;
 define('WECHAT_USER_TABLE', 'message_wechatmp_user');
 
@@ -173,9 +175,31 @@ class message_wechatmp_external extends external_api {
             $DB->set_field(WECHAT_USER_TABLE, 'remainingnumber', $cur_num + 1, array('userid' => $userid));
             return $cur_num + 1;
         }
+        return -1;
     }
 
     public static function subscribe_returns() {
-        return new external_value(PARAM_INT, '1 if success, 0 otherwise');
+        return new external_value(PARAM_INT, 'Positive value if success, -1 otherwise');
+    }
+
+    public static function remaining_number_parameters() {
+        return new external_function_parameters(
+            array()
+        );
+    }
+
+    public static function remaining_number() {
+        global $DB, $USER;
+
+        $userid = $USER->id;
+        if ($DB->count_records(WECHAT_USER_TABLE, array('userid' => $userid)) == 1) {
+            return $DB->get_field(WECHAT_USER_TABLE, 'remainingnumber', array('userid' => $userid));
+        }
+
+        return -1;
+    }
+
+    public static function remaining_number_returns() {
+        return new external_value(PARAM_INT, 'Nonnegetive value of remaining number of notification can be set to wecchat, -1 if the user\'s wechat account not exist');
     }
 }
