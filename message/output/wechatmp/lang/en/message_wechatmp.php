@@ -22,13 +22,13 @@
  * @copyright 2020 Zheng Zhibin
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-$string['accesstokenretrievedsuccessfully'] = '微信access token获取成功';
-$string['configappid'] = '微信小程序的appid';
-$string['configappsecret'] = 'appid对应的appsecert';
-$string['configdueassigntemplateid'] = '作业到期通知的模板id';
-$string['dueassigntemplateid'] = '模板id';
+$string['accesstokenretrievedsuccessfully'] = 'Fetch Wechat access token successfully';
+$string['configappid'] = 'Appid of wechat';
+$string['configappsecret'] = 'Appsecert to the appid';
+$string['configdueassigntemplateid'] = 'Template id for due assignment notification';
+$string['dueassigntemplateid'] = 'Template id';
 $string['myfield'] = 'This is my custom field';
-$string['pluginname'] = '微信小程序通知';
-$string['requestaccesstoken'] = '请求微信access token';
-$string['wechatappid'] = '微信Appid';
-$string['wechatappsecret'] = '微信Appseceret';
+$string['pluginname'] = 'Wechat miniprogram notification';
+$string['requestaccesstoken'] = 'Request access token';
+$string['wechatappid'] = 'Wchat Appid';
+$string['wechatappsecret'] = 'Wechat Appseceret';
