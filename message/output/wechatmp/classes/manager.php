@@ -143,6 +143,7 @@ class message_wechatmp_manager {
                 if ($user->openid != $openid) {
                     $DB->set_field('message_wechatmp_user', 'openid', $openid);
                 }
+                return true;
             }
 
             $user = new stdClass();
