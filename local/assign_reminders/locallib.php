@@ -60,12 +60,12 @@ function process_event($event, $aheadday, $activityroleids=null, $showtrace=true
 
         if ($event->courseid <= 0 && $event->userid > 0) {
             // A user overridden activity.
-            $showtrace && mtrace("  [Local Reminder] Event #".$event->id." is a user overridden ".$event->modulename." event.");
+            $showtrace && mtrace("  [Assignment Reminder] Event #".$event->id." is a user overridden ".$event->modulename." event.");
             $user = $DB->get_record('user', array('id' => $event->userid));
             $sendusers[] = $user;
         } else if ($event->courseid <= 0 && $event->groupid > 0) {
             // A group overridden activity.
-            $showtrace && mtrace("  [Local Reminder] Event #".$event->id." is a group overridden ".$event->modulename." event.");
+            $showtrace && mtrace("  [Assignment Reminder] Event #".$event->id." is a group overridden ".$event->modulename." event.");
             $group = $DB->get_record('groups', array('id' => $event->groupid));
             $sendusers = get_users_in_group($group);
         } else {
@@ -129,7 +129,7 @@ function assign_fetch_module_instance($modulename, $instance, $courseid=0, $show
     try {
         return $DB->get_record_sql($sql, $params, IGNORE_MISSING);
     } catch (moodle_exception $mex) {
-        $showtrace && mtrace('  [Local Reminder - ERROR] Failed to fetch module instance! '.$mex->getMessage());
+        $showtrace && mtrace('  [Assignment Reminder - ERROR] Failed to fetch module instance! '.$mex->getMessage());
         return null;
     }
 }

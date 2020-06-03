@@ -46,7 +46,7 @@ function local_assign_reminders_cron() {
     global $CFG, $DB;
 
     if (!isset($CFG->local_assign_reminders_enable) || !$CFG->local_assign_reminders_enable) {
-        mtrace("   [Local Reminder] This cron cycle will be skipped, because plugin is not enabled!");
+        mtrace("   [Assignment Reminder] This cron cycle will be skipped, because plugin is not enabled!");
         return;
     }
 
@@ -61,7 +61,7 @@ function local_assign_reminders_cron() {
 
     $timewindowstart = $currtime;
     if (!$logrows) {  // This is the first cron cycle, after plugin is just installed.
-        mtrace("   [Local Reminder] This is the first cron cycle");
+        mtrace("   [Assignment Reminder] This is the first cron cycle");
         $timewindowstart = $timewindowstart - ASSIGN_REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS * 24 * 3600;
     } else {
         // Info field includes that starting time of last cron cycle.
@@ -97,17 +97,17 @@ function local_assign_reminders_cron() {
         }
     }
 
-    mtrace("   [Local Reminder] Time window: ".userdate($timewindowstart)." to ".userdate($timewindowend));
+    mtrace("   [Assignment Reminder] Time window: ".userdate($timewindowstart)." to ".userdate($timewindowend));
 
     $upcomingevents = $DB->get_records_select('event', $whereclause);
     if (!$upcomingevents) {
-        mtrace("   [Local Reminder] No upcoming events. Aborting...");
+        mtrace("   [Assignment Reminder] No upcoming assignments. Aborting...");
 
         add_flag_record($timewindowend, 'no_events');
         return;
     }
 
-    mtrace("   [Local Reminder] Found ".count($upcomingevents)." upcoming events. Continuing...");
+    mtrace("   [Assignment Reminder] Found ".count($upcomingevents)." upcoming assignments. Continuing...");
 
     $allnotificationfailed = true;
     foreach ($upcomingevents as $event) {
@@ -126,46 +126,51 @@ function local_assign_reminders_cron() {
             $aheadday = 7;
         }
 
-        mtrace("   [Local Reminder] Processing event#$event->id [Type: $event->eventtype, inaheadof=$aheadday days]...");
+        mtrace("   [Assignment Reminder] Processing event#$event->id [inaheadof=$aheadday days]...");
 
         $optionstr = 'local_assign_reminders_rdays';
         if (!isset($CFG->$optionstr)) {
-            mtrace("   [Local Reminder] Couldn't find option for assignment $event->id");
+            mtrace("   [Assignment Reminder] Couldn't find option for assignment");
             continue;
         }
 
         $options = $CFG->$optionstr;
 
-        if (empty($options)) {
-            mtrace("   [Local Reminder] No configuration for assignment, [event#$event->id is ignored!]...");
+        if (empty($options) || $optionstr == null) {
+            mtrace("   [Assignment Reminder] No configuration for assignment, [event#$event->id is ignored!]...");
+            continue;
+        }
+
+        if ($optionstr[$aheaddaysindex[$aheaddaysindex]] == 0) {
+            mtrace("    [Assignment Reminder] Reminder in ahead of $aheadday is not set. [event#$event->id is ignored!]...");
             continue;
         }
         
         $reminderref = null;
-        mtrace("   [Local Reminder] Finding out users for assignment#".$event->id."...");
+        mtrace("   [Assignment Reminder] Finding out users for assignment#".$event->id."...");
 
         $assignroleids = array(1 => 5);
         try {
             $reminderref = process_event($event, $aheadday, $assignroleids);
         } catch (Exception $ex) {
-            mtrace("  [Local Reminder - ERROR] Error occured when initializing ".
+            mtrace("  [Assignment Reminder - ERROR] Error occured when initializing ".
                     "for event#[$event->id] ".$ex->getMessage());
-            mtrace("  [Local Reminder - ERROR] ".$ex->getTraceAsString());
+            mtrace("  [Assignment Reminder - ERROR] ".$ex->getTraceAsString());
             continue;
         }
 
         if ($reminderref == null) {
-            mtrace("  [Local Reminder] Reminder is not available for the event $event->id [type: $event->eventtype]");
+            mtrace("  [Assignment Reminder] Reminder is not available for the event $event->id [type: $event->eventtype]");
             continue;
         }
 
         $usize = $reminderref->get_total_users_to_send();
         if ($usize == 0) {
-            mtrace("  [Local Reminder] No users found to send reminder for the event#$event->id");
+            mtrace("  [Assignment Reminder] No users found to send reminder for the event#$event->id");
             continue;
         }
 
-        mtrace("  [Local Reminder] Starting sending reminders for $event->id [type: $event->eventtype]");
+        mtrace("  [Assignment Reminder] Starting sending reminders for $event->id [type: $event->eventtype]");
         $failedcount = 0;
 
         $fromuser = get_admin();
@@ -188,9 +193,9 @@ function local_assign_reminders_cron() {
         }
 
         if ($failedcount > 0) {
-            mtrace("  [Local Reminder] Failed to send $failedcount reminders to users for event#$event->id");
+            mtrace("  [Assignment Reminder] Failed to send $failedcount reminders to users for event#$event->id");
         } else {
-            mtrace("  [Local Reminder] All reminders was sent successfully for event#$event->id !");
+            mtrace("  [Assignment Reminder] All reminders was sent successfully for event#$event->id !");
         }
 
         if ($usize != $failedcount) {
@@ -202,9 +207,9 @@ function local_assign_reminders_cron() {
 
     if (!$allnotificationfailed) {
         add_flag_record($timewindowend, 'sent');
-        mtrace('  [Local Reminder] Marked this reminder execution as success.');
+        mtrace('  [Assignment Reminder] Marked this reminder execution as success.');
     } else {
-        mtrace('  [Local Reminder] Failed to send any email to any user! Will retry again next time.');
+        mtrace('  [Assignment Reminder] Failed to send any email to any user! Will retry again next time.');
     }
 }
 
