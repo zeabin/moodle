@@ -61,22 +61,11 @@ class message_output_wechatmp extends message_output {
             return true;
         }
         
-        
-        if (empty($eventdata->modulename) || empty($eventdata->smallmessage) || empty($eventdata->customdata) ||
-                $eventdata->modulename != 'assign' || $eventdata->smallmessage != 'assign_due') { // Only assignment notification can be sent.
-            return false;
-        }
-
         $manager = new message_wechatmp_manager();
-        if ($user = $manager->get_wechat_user($eventdata->userto->id)) {
-            $customdata = json_decode($eventdata->customdata, true);
-            $assignname = $customdata['assignname'];
-            $coursename = $customdata['coursename'];
-
-            return self::send_due_assignment_message($coursename, $assignname, $user);
+        if ($manager->is_assign_due_message($eventdata)) { // Currently only assignment notification can be sent.
+            return $this->send_due_assignment_message($eventdata);
         }
 
-        // Cannot find the openid for the user.
         return false;
     }
 
@@ -116,8 +105,17 @@ class message_output_wechatmp extends message_output {
      * @param object wechat user object
      * @return boolean true if success, false otherwise
      */
-    private function send_due_assignment_message($coursename, $assignname, $user) {
+    private function send_due_assignment_message($eventdata) {
         global $CFG, $DB;
+
+        $manager = new message_wechatmp_manager();
+        if (!($user = $manager->get_wechat_user($eventdata->userto->id))) {
+            return false; // Wechat account not found.
+        }
+        $customdata = json_decode($eventdata->customdata, true);
+        $assignname = $customdata['assignname'];
+        $coursename = $customdata['coursename'];
+        $time = $customdata['time'];
 
         // 一次性订阅消息需要检查用户订阅次数是否大于0
         if ($user->remainingnumber <= 0) {
@@ -139,6 +137,9 @@ class message_output_wechatmp extends message_output {
                     ),
                     'thing9' => array(
                         'value' => "$assignname"
+                    ),
+                    'thing5' => array(
+                        'value' => "$time"
                     )
                 )
             );
