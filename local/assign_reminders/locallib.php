@@ -62,9 +62,6 @@ function process_event($event, $aheadday, $activityroleids=null, $showtrace=true
         // from get_role_users (has odd behaivior when called with an array for $roleid param'.
         $sendusers = assign_get_active_role_users($activityroleids, $context);
 
-        foreach ($activityroleids as $key=>$value) {
-            mtrace($key. ' '. $value);
-        }
         // Filter user list,
         $info = new \core_availability\info_module($cm);
         $sendusers = $info->filter_user_list($sendusers);
