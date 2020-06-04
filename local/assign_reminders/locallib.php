@@ -58,29 +58,16 @@ function process_event($event, $aheadday, $activityroleids=null, $showtrace=true
         $sendusers = array();
         $reminder = new assign_reminder($event, $course, $context, $cm, $aheadday);
 
-        if ($event->courseid <= 0 && $event->userid > 0) {
-            // A user overridden activity.
-            $showtrace && mtrace("  [Assignment Reminder] Event #".$event->id." is a user overridden ".$event->modulename." event.");
-            $user = $DB->get_record('user', array('id' => $event->userid));
-            $sendusers[] = $user;
-        } else if ($event->courseid <= 0 && $event->groupid > 0) {
-            // A group overridden activity.
-            $showtrace && mtrace("  [Assignment Reminder] Event #".$event->id." is a group overridden ".$event->modulename." event.");
-            $group = $DB->get_record('groups', array('id' => $event->groupid));
-            $sendusers = get_users_in_group($group);
-        } else {
-            // Here 'ra.id field added to avoid printing debug message,
-            // from get_role_users (has odd behaivior when called with an array for $roleid param'.
-            $sendusers = assign_get_active_role_users($activityroleids, $context);
+        // Here 'ra.id field added to avoid printing debug message,
+        // from get_role_users (has odd behaivior when called with an array for $roleid param'.
+        $sendusers = assign_get_active_role_users($activityroleids, $context);
 
-            foreach ($activityroleids as $key=>$value) {
-                mtrace($key. ' '. $value);
-            }
-            // Filter user list,
-            // see: https://docs.moodle.org/dev/Availability_API.
-            $info = new \core_availability\info_module($cm);
-            $sendusers = $info->filter_user_list($sendusers);
+        foreach ($activityroleids as $key=>$value) {
+            mtrace($key. ' '. $value);
         }
+        // Filter user list,
+        $info = new \core_availability\info_module($cm);
+        $sendusers = $info->filter_user_list($sendusers);
 
         $filteredusers = $reminder->filter_authorized_users($sendusers);
         // $filteredusers = $sendusers;

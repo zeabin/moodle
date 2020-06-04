@@ -133,9 +133,11 @@ class assign_reminder {
             $admin = get_admin();
         }
         $coursename = $DB->get_field('course', 'fullname', array('id' => $this->event->courseid));
+        $time = $this->format_datetime($this->event->timestart, $admin);
         $customdata = array(
             'coursename' => $coursename,
-            'assignname' => $this->event->name,
+            'assignname' => substr($this->event->name, 0, strpos($this->event->name, ' ')),
+            'time'       => $time,
             'eventtype'  => 'due'
         );
         $eventdata = new \core\message\message();
@@ -233,4 +235,23 @@ class assign_reminder {
         return $eventdata;
     }
 
+    /**
+     * Formats given date and time based on given user's timezone.
+     *
+     * @param number $datetime epoch time.
+     * @param object $user user to format for.
+     * @return string formatted date time according to give user.
+     */
+    protected function format_datetime($datetime, $user) {
+        $tzone = 99;
+        if (isset($user) && !empty($user)) {
+            $tzone = core_date::get_user_timezone($user);
+        }
+
+        $daytimeformat = get_string('strftimedaydate', 'langconfig');
+        $utimeformat = get_correct_timeformat_user($user);
+        mtrace(userdate($datetime, $daytimeformat, $tzone).' '.userdate($datetime, $utimeformat, $tzone));
+        return userdate($datetime, $daytimeformat, $tzone).
+            ' '.userdate($datetime, $utimeformat, $tzone);
+    }
 }
