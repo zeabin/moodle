@@ -138,7 +138,7 @@ class message_wechatmp_manager {
     public function bind_wechat_account($code) {
         global $DB, $USER;
 
-        if ($openid = self::request_openid($code)) {
+        if ($openid = $this->request_openid($code)) {
             if ($user = $DB->get_record('message_wechatmp_user', array('openid' => $openid), '*')) {
                 if ($user->openid != $openid) {
                     $DB->set_field('message_wechatmp_user', 'openid', $openid);
@@ -167,7 +167,7 @@ class message_wechatmp_manager {
     }
     
     /**
-     * 
+     * Add subscribe count to a wechat user.
      */
     public function subscribe($openid) {
         global $DB, $USER;
@@ -184,5 +184,13 @@ class message_wechatmp_manager {
         $number = $user->remainingnumber + 1;
         $DB->set_field('message_wechatmp_user', 'remainingnumber', $number, array('openid' => $openid));
         return $number;
+    }
+
+    /**
+     * Check if the eventdata is a assign due event
+     */
+    public function is_assign_due_message($eventdata) {
+        return !(empty($eventdata->modulename) || empty($eventdata->smallmessage) || empty($eventdata->customdata) ||
+                $eventdata->modulename != 'assign' || $eventdata->smallmessage != 'assign_due');
     }
 }
