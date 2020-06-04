@@ -236,6 +236,27 @@ class assign_reminder {
     }
 
     /**
+     * This function would return time formats relevent for the given user.
+     * Sometimes a user might have changed time display format in his/her preferences.
+     *
+     * @param object $user user instance to get specific time format.
+     * @return string date time format for user.
+     */
+    function get_correct_timeformat_user($user) {
+        static $langtimeformat = null;
+        if ($langtimeformat === null) {
+            $langtimeformat = get_string('strftimetime', 'langconfig');
+        }
+
+        // We get user time formattings... if such exist, will return non-empty value.
+        $utimeformat = get_user_preferences('calendar_timeformat', '', $user);
+        if (empty($utimeformat)) {
+            $utimeformat = get_config(null, 'calendar_site_timeformat');
+        }
+        return empty($utimeformat) ? $langtimeformat : $utimeformat;
+    }
+
+    /**
      * Formats given date and time based on given user's timezone.
      *
      * @param number $datetime epoch time.
@@ -249,8 +270,8 @@ class assign_reminder {
         }
 
         $daytimeformat = get_string('strftimedaydate', 'langconfig');
-        $utimeformat = get_correct_timeformat_user($user);
-        mtrace(userdate($datetime, $daytimeformat, $tzone).' '.userdate($datetime, $utimeformat, $tzone));
+        $utimeformat = $this->get_correct_timeformat_user($user);
+        
         return userdate($datetime, $daytimeformat, $tzone).
             ' '.userdate($datetime, $utimeformat, $tzone);
     }
