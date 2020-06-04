@@ -141,7 +141,7 @@ function local_assign_reminders_cron() {
             continue;
         }
 
-        if ($optionstr[$aheaddaysindex[$aheaddaysindex]] == 0) {
+        if ($options[$aheaddaysindex[$aheadday]] == 0) {
             mtrace("    [Assignment Reminder] Reminder in ahead of $aheadday is not set. [event#$event->id is ignored!]...");
             continue;
         }
