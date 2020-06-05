@@ -49,6 +49,7 @@ header('Access-Control-Allow-Origin: *');
 
 $filepath = optional_param('filepath', '/', PARAM_PATH);
 $itemid = optional_param('itemid', 0, PARAM_INT);
+$filenames = optional_param_array('filenames', [], PARAM_FILE);
 
 echo $OUTPUT->header();
 
@@ -66,6 +67,7 @@ $context = context_user::instance($USER->id);
 $fs = get_file_storage();
 
 $totalsize = 0;
+$count = 0;
 $files = array();
 foreach ($_FILES as $fieldname=>$uploaded_file) {
     // check upload errors
@@ -102,6 +104,9 @@ foreach ($_FILES as $fieldname=>$uploaded_file) {
 
     $file = new stdClass();
     $file->filename = clean_param($_FILES[$fieldname]['name'], PARAM_FILE);
+    if (count($filenames) > 0) {
+        $file->filename = $filenames[$count++];
+    }
     // check system maxbytes setting
     if (($_FILES[$fieldname]['size'] > get_max_upload_file_size($CFG->maxbytes))) {
         // oversize file will be ignored, error added to array to notify
